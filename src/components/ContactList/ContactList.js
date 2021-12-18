@@ -1,30 +1,22 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteContacts } from '../../redux/contacts-actions';
-import PropTypes from 'prop-types';
+import { deleteContacts } from '../../redux/contacts/contacts-operations';
+import { getFilteredContacts } from '../../redux/contacts/contacts-selectors';
+import propTypes from 'prop-types';
 import s from './ContactList.module.css';
 
-function ContactList() {
-  const { contacts, filter } = useSelector(state => state);
+export default function ContactsList() {
+  const filterContacts = useSelector(getFilteredContacts);
   const dispatch = useDispatch();
-  const onDeleteBtn = id => dispatch(deleteContacts(id));
-
-  const filteredContacts = (contacts, filter) => {
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase()),
-    );
-  };
-
-  const filterContacts = filteredContacts(contacts, filter);
 
   return (
     <>
       <ul>
-        {filterContacts.map(({ id, name, number }) => (
+        {filterContacts.map(({ id, name, phone }) => (
           <li key={id}>
-            <p className={s.nameText}>
-              {name}: <span>{number}</span>
+            <p className={s.list}>
+              {name}: <span>{phone}</span>
             </p>
-            <button type="button" onClick={e => onDeleteBtn(id)}>
+            <button className={s.btn}type="button" onClick={() => dispatch(deleteContacts(id))}>
               Delete
             </button>
           </li>
@@ -32,17 +24,15 @@ function ContactList() {
       </ul>
     </>
   );
-};
+}
 
-ContactList.propTypes = {
-  onDeleteBtn: PropTypes.func,
-  contacts: PropTypes.arrayOf(
-    PropTypes.exact({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      number: PropTypes.string,
+ContactsList.propTypes = {
+  onDeleteBtn: propTypes.func,
+  contacts: propTypes.arrayOf(
+    propTypes.exact({
+      id: propTypes.string,
+      name: propTypes.string,
+      phone: propTypes.string,
     }),
   ),
 };
-
-export default ContactList;

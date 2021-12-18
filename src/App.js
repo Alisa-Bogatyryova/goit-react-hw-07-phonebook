@@ -1,27 +1,40 @@
-import { connect } from 'react-redux';
-import Container from './components/Container/Container';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchContacts } from './redux/contacts/contacts-operations';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import { getContacts, getIsLoading } from './redux/contacts/contacts-selectors';
+import Loader from 'react-loader-spinner';
+import Section from './components/Container/Container';
 import ContactForm from './components/ContactForm/ContactForm';
-import Filter from './components/Filter/Filter';
 import ContactList from './components/ContactList/ContactList';
+import Filter from './components/Filter/Filter';
 
-const App = ({contacts}) => {
+
+export default function App() {
+  const contacts = useSelector(getContacts);
+  const isLoading = useSelector(getIsLoading);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
   return (
-    <Container>
-        <ContactForm  />
-          <h2>Contacts</h2>
-        {contacts.length > 1 && (
-          <Filter />
-        )}
-        {contacts.length > 0 ? (
-          <ContactList/>
-        ) : (
-          <p>Your phonebook is empty. Please add contact.</p>
-        )}
-    </Container>
-  );
-};
-const mapStateToProps = state => ({
-  contacts: state.contacts,
-});
+    <div>
+      <Section title="Phonebook">
+        <ContactForm />
+      </Section>
 
-export default connect(mapStateToProps)(App);
+      {isLoading ? (
+        <Loader type="Rings" color="#00BFFF" height={80} width={80} />
+      ) : null}
+
+      {contacts.length ? (
+        <Section title="Contacts">
+          <Filter />
+          <ContactList />
+        </Section>
+      ) : null}
+      </div> 
+  )
+}
