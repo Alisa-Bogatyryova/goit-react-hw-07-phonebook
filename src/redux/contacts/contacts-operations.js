@@ -1,41 +1,39 @@
-import axios from 'axios';
-import {
-  addContactsRequest,
-  addContactsSuccess,
-  addContactsError,
-  deleteContactsRequest,
-  deleteContactsSuccess,
-  deleteContactsError,
-  fetchContactsRequest,
-  fetchContactsSuccess,
-  fetchContactsError,
-} from './contacts-actions';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import * as contactsAPI from 'services/contactsAPI';
 
-axios.defaults.baseURL = 'http://localhost:3000';
 
-export const fetchContacts = () => dispatch => {
-  dispatch(fetchContactsRequest());
-  axios
-    .get('/contacts')
-    .then(({ data }) => dispatch(fetchContactsSuccess(data)))
-    .catch(error => dispatch(fetchContactsError(error)));
-};
+export const fetchContacts = createAsyncThunk(
+  'contacts/fetchContacts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const contacts = await contactsAPI.fetchContacts();
+      return contacts;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-export const addContact = (name, phone) => dispatch => {
-  const contact = { name, phone };
+export const addContact = createAsyncThunk(
+  'contacts/addContact',
+  async (contact, { rejectWithValue }) => {
+    try {
+      const result = await contactsAPI.addContact(contact);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-  dispatch(addContactsRequest());
-  axios
-    .post('/contacts', contact)
-    .then(({ data }) => dispatch(addContactsSuccess(data)))
-    .catch(error => dispatch(addContactsError(error)));
-};
-
-export const deleteContacts = id => dispatch => {
-  dispatch(deleteContactsRequest());
-
-  axios
-    .delete(`/contacts/${id}`)
-    .then(() => dispatch(deleteContactsSuccess(id)))
-    .catch(error => dispatch(deleteContactsError(error)));
-};
+export const deleteContact = createAsyncThunk(
+  'contacts/deleteContact',
+  async (contactId, { rejectWithValue }) => {
+    try {
+      await contactsAPI.deleteContact(contactId);
+      return contactId;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
